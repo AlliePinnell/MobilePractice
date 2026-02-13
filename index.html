@@ -45,6 +45,21 @@
   }
 }
 
+/* Answer List Proper Layout Fix */
+#answerList .card {
+    position: absolute;
+
+    top: 44px;      /* below status bar */
+    bottom: 60px;   /* above nav bar */
+    left: 16px;
+    right: 16px;
+
+    transform: none !important;  /* kill translateY(-50%) */
+    overflow-y: auto;
+
+    display: block;  /* override flex centering ONLY here */
+}
+
 
 
 body {
@@ -558,6 +573,15 @@ button:hover {
         </div>
     </div>
 
+<div class="screen" id="answerList">
+    <div class="card" >
+        <div id="answerListTitle" class="quiz-title"></div>
+        <div id="answerListContent" style="color:white; font-size:14px; text-align:left;"></div>
+    </div> 
+</div>
+
+
+
     <div class="tutorial" id="tutorial">
         <div class="tutorial-box">
             <h3>Welcome!👋</h3>
@@ -669,7 +693,8 @@ const sections = [
     { id: "views", name: "Views/Widgets/Layouts", icon: "🪟" },
     { id: "intents", name: "Intents", icon: "🔀" },
     { id: "viewmodel", name: "ViewModel/LiveData", icon: "📦" },
-    { id: "fragments", name: "Fragments", icon: "🧱" }
+    { id: "fragments", name: "Fragments", icon: "🧱" },
+    { id: "answers", name: "Answer List", icon: "📋" }
 ];
 
 const questionsBySection = {
@@ -2026,6 +2051,13 @@ function popIcons(){
 
 /* NAV */
 function openSection(id,name){
+
+    // If Answer List App
+    if(id === "answers"){
+        showAnswerSectionSelector();
+        return;
+    }
+
     currentIndex = 0;
     score = 0;
     currentSection=id;
@@ -2037,7 +2069,8 @@ function openSection(id,name){
 
 function goHome(){
     document.getElementById("quiz").classList.remove("active");
-    document.getElementById("results").classList.remove("active"); // ← ADD THIS
+    document.getElementById("results").classList.remove("active");
+    document.getElementById("answerList").classList.remove("active");
     document.getElementById("home").classList.add("active");
 
     document.querySelectorAll(".app-icon.clicked")
@@ -2086,7 +2119,6 @@ function loadQuestion(){
     }
 }
 
-
 function answer(value){
     const pack = questionsBySection[currentSection];
     if(!pack) return;
@@ -2114,6 +2146,69 @@ function answer(value){
     currentIndex++;
     setTimeout(loadQuestion, 900);
 }
+
+function showAnswerSectionSelector(){
+    document.getElementById("home").classList.remove("active");
+    document.getElementById("answerList").classList.add("active");
+
+    const title = document.getElementById("answerListTitle");
+    const content = document.getElementById("answerListContent");
+
+    title.textContent = "Select Section";
+
+    content.innerHTML = "";
+
+    sections.forEach(section => {
+        if(section.id === "answers") return;
+
+        const btn = document.createElement("button");
+        btn.textContent = section.name;
+        btn.style.background = "#4285F4";
+        btn.style.marginBottom = "8px";
+        btn.onclick = () => loadAnswerList(section.id, section.name);
+
+        content.appendChild(btn);
+    });
+}
+
+function loadAnswerList(sectionId, sectionName){
+    const pack = questionsBySection[sectionId] || [];
+
+    document.getElementById("answerListTitle").textContent =
+        sectionName + " — Answers";
+
+    const content = document.getElementById("answerListContent");
+    content.innerHTML = "";
+
+    pack.forEach((q,index)=>{
+
+        const div = document.createElement("div");
+        div.style.marginBottom = "16px";
+        div.style.paddingBottom = "10px";
+        div.style.borderBottom = "1px solid rgba(255,255,255,0.15)";
+
+        let correctText;
+
+        if(q.options === undefined){
+            correctText = q.answer ? "True" : "False";
+        } else {
+            correctText = q.options[q.answer];
+        }
+
+        div.innerHTML = `
+            <div style="font-weight:600; margin-bottom:6px;">
+                ${index+1}. ${q.text}
+            </div>
+            <div style="color:#4CAF50;">
+                ✔ Correct Answer: ${correctText}
+            </div>
+        `;
+
+        content.appendChild(div);
+    });
+}
+
+
 
 
 
