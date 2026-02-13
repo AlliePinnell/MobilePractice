@@ -1,0 +1,2133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>3025G Practice</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+* { box-sizing: border-box; }
+
+/* GLOBAL SOFT MOTION */
+@keyframes floatSoft {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+@keyframes glowPulse {
+  0%,100% { box-shadow: 0 0 0 rgba(255,255,255,0); }
+  50% { box-shadow: 0 0 22px rgba(255,255,255,0.25); }
+}
+
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes drift {
+  0% { transform: scale(1) translateY(0); }
+  100% { transform: scale(1.05) translateY(-20px); }
+}
+
+.confetti {
+  position: absolute;
+  width: 8px;
+  height: 12px;
+  top: -20px;
+  animation: fall 3s linear forwards;
+  opacity: 0.9;
+}
+
+@keyframes fall {
+  to {
+    transform: translateY(760px) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+
+
+body {
+    margin: 0;
+    height: 100vh;
+    background: #000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: Roboto, Arial, sans-serif;
+    user-select: none;
+}
+
+/* PHONE */
+.phone {
+    width: 360px;
+    height: 720px;
+    border-radius: 32px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.8);
+    background: white;
+}
+
+/* WALLPAPER */
+.wallpaper {
+    position: absolute;
+    inset: 0;
+    background-image: url("https://tse3.mm.bing.net/th/id/OIP.VjeUzr4sAGx0alL7-GA3FAHaNK?rs=1&pid=ImgDetMain&o=7&rm=3");
+    background-size: cover;
+    background-position: center;
+    opacity: 0;
+    animation: drift 18s alternate infinite ease-in-out;
+    transition: opacity 1.1s cubic-bezier(.2,.9,.2,1);
+}
+
+/* STATUS BAR */
+.status-bar {
+    position: relative;
+    z-index: 6;
+    height: 28px;
+    padding: 0 12px;
+    font-size: 12px;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* STATUS ICONS */
+.status-icons {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.wifi {
+    width: 16px;
+    height: 1px;
+    position: relative;
+    opacity: 0.95;
+}
+.wifi::before, .wifi::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 2px solid transparent;
+    border-top-color: rgba(255,255,255,0.95);
+    border-radius: 50%;
+}
+.wifi::before {
+    width: 16px;
+    height: 16px;
+    top: -10px;
+}
+.wifi::after {
+    width: 10px;
+    height: 10px;
+    top: -7px;
+}
+.wifi-dot {
+    position: absolute;
+    left: 50%;
+    bottom: -1px;
+    width: 4px;
+    height: 4px;
+    transform: translateX(-50%);
+    background: rgba(255,255,255,0.95);
+    border-radius: 50%;
+}
+
+.cell {
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 12px;
+}
+.cell span {
+    width: 3px;
+    background: rgba(255,255,255,0.95);
+    border-radius: 2px;
+    opacity: 0.95;
+}
+.cell span:nth-child(1){ height: 4px; opacity: 0.6; }
+.cell span:nth-child(2){ height: 6px; opacity: 0.7; }
+.cell span:nth-child(3){ height: 9px; opacity: 0.85; }
+.cell span:nth-child(4){ height: 12px; }
+
+.battery {
+    display: flex;
+    align-items: center;
+    gap: -4px;
+}
+.battery-body {
+    width: 22px;
+    height: 10px;
+    border: 2px solid white;
+    border-radius: 3px;
+    position: relative;
+    overflow: hidden;
+}
+.battery-level {
+    height: 100%;
+    width: 50%;
+    background: #34A853;
+    transition: width 0.35s, background 0.35s;
+}
+.battery-tip {
+    width: 3px;
+    height: 6px;
+    background: white;
+    border-radius: 1px;
+    opacity: 0.9;
+}
+
+/* SCREENS */
+.screen {
+    position: absolute;
+    inset: 0;
+    padding: 16px;
+    display: none;
+    z-index: 1;
+    opacity: 0;
+    transform: translateY(10px) scale(0.995);
+    transition: opacity 0.55s, transform 0.55s;
+}
+
+.screen.active {
+    display: block;
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+
+/* BOOT */
+.boot {
+    background: white;
+    z-index: 10;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.logo-wrap {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -55%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+}
+
+.logo span {
+    font-size: 36px;
+    font-weight: 600;
+    opacity: 0;
+    display: inline-block;
+    animation: popIn 0.7s forwards;
+}
+
+.logo span:nth-child(1){color:#4285F4;animation-delay:.08s}
+.logo span:nth-child(2){color:#EA4335;animation-delay:.16s}
+.logo span:nth-child(3){color:#FBBC05;animation-delay:.24s}
+.logo span:nth-child(4){color:#4285F4;animation-delay:.32s}
+.logo span:nth-child(5){color:#34A853;animation-delay:.40s}
+.logo span:nth-child(6){color:#EA4335;animation-delay:.48s}
+.logo span:nth-child(7){color:#34A853;animation-delay:.56s}
+
+.tagline {
+    font-size: 14px;
+    color: rgba(0,0,0,0.55);
+    letter-spacing: 0.2px;
+    opacity: 0;
+    transform: translateY(10px);
+    animation: taglineIn 0.7s forwards;
+    animation-delay: 0.95s;
+}
+
+@keyframes popIn {
+    from { transform: translateY(18px) scale(0.7); opacity: 0; filter: blur(4px); }
+    to { transform: translateY(0) scale(1); opacity: 1; filter: blur(0); }
+}
+
+@keyframes taglineIn {
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.boot.fade-out {
+    animation: fadeOut 0.8s forwards;
+}
+
+@keyframes fadeOut {
+    to { opacity: 0; visibility: hidden; }
+}
+
+/* HOME */
+.home-grid {
+    margin-top: 60px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+}
+
+.app-icon {
+    backdrop-filter: blur(6px);
+    background: rgba(0,0,0,0.45);
+    border-radius: 22px;
+    padding: 16px 6px;
+    text-align: center;
+    color: white;
+    cursor: pointer;
+    opacity: 0;
+    transform: translateY(16px) scale(0.96);
+    transition: transform 0.18s, background 0.25s;
+}
+
+.app-icon.show {
+    animation: iconPop 0.55s forwards;
+}
+
+@keyframes iconPop {
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.icon-inner {
+    transition: transform 0.18s;
+}
+
+@keyframes jiggle {
+    0%   { transform: translateY(0) scale(1) rotate(0deg); }
+    25%  { transform: translateY(0) scale(1.02) rotate(-2deg); }
+    50%  { transform: translateY(0) scale(1.02) rotate(2deg); }
+    75%  { transform: translateY(0) scale(1.02) rotate(-1deg); }
+    100% { transform: translateY(0) scale(1) rotate(0deg); }
+}
+
+.app-icon:hover .icon-inner {
+    animation: jiggle 0.35s ease-in-out infinite;
+}
+
+.app-icon.clicked {
+    pointer-events: none;
+}
+
+.app-icon .emoji { font-size: 30px; }
+.app-icon .label { font-size: 9px; margin-top: 6px; }
+
+/* CALENDAR WIDGET */
+.calendar-widget {
+    position: absolute;
+    left: 16px;
+    right: 16px;
+    bottom: 58px;
+    padding: 14px 16px;
+    border-radius: 22px;
+    backdrop-filter: blur(10px);
+    background: rgba(0,0,0,0.55);
+    color: white;
+    z-index: 4;
+    box-shadow: 0 18px 45px rgba(0,0,0,0.35);
+}
+
+.calendar-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+.calendar-title {
+    font-size: 14px;
+    font-weight: 600;
+    opacity: 0.95;
+}
+
+.calendar-date {
+    font-size: 12px;
+    opacity: 0.85;
+}
+
+.calendar-midterm {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+}
+
+.midterm-pill {
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.12);
+    font-size: 12px;
+    opacity: 0.95;
+}
+
+/* QUIZ */
+#quiz {
+    padding: 16px;
+}
+
+#quiz .card {
+    position: absolute;
+    left: 16px;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.card {
+    backdrop-filter: blur(10px);
+    background: rgba(0,0,0,0.6);
+    border-radius: 22px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.quiz-title {
+    color: #4caf50;
+    margin-bottom: 16px;
+    text-align: center;
+}
+
+.question {
+    color: white;
+    font-size: 18px;
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.buttons {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    width: 100%;
+}
+
+
+button {
+    flex: 1;
+    padding: 14px;
+    border-radius: 16px;
+    border: none;
+    font-size: 16px;
+    color: white;
+    cursor: pointer;
+    transition: transform 0.12s, filter 0.12s, box-shadow 0.2s;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+button:active { 
+    transform: scale(0.95);
+    filter: brightness(0.92);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+button:hover {
+    box-shadow: 0 6px 12px rgba(0,0,0,0.25);
+}
+
+.true { background: #43a047; }
+.false { background: #e53935; }
+
+/* NAV BAR */
+.nav-bar {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 48px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 7;
+}
+
+.nav-pill {
+    width: 100px;
+    height: 5px;
+    background: rgba(255,255,255,0.7);
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.notification {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 14px 24px;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    color: white;
+    z-index: 99;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+}
+
+.notification.correct { background: #4CAF50; }
+.notification.incorrect { background: #F44336; }
+
+.tutorial {
+    position: absolute;
+    inset: 0;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 20;
+    background: rgba(0,0,0,0.55);
+    padding: 20px;
+}
+
+.tutorial.show { display: flex; }
+
+.tutorial-box {
+    width: 100%;
+    max-width: 285px;
+    background: rgba(30,30,30,0.95);
+    color: white;
+    border-radius: 24px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 20px 55px rgba(0,0,0,0.65);
+}
+
+.tutorial-box h3 { margin: 0 0 10px; font-size: 18px; }
+.tutorial-box p { font-size: 14px; opacity: 0.9; line-height: 1.4; }
+.tutorial-box button {
+    margin-top: 14px;
+    width: 100%;
+    background: #4285F4;
+    border: none;
+    padding: 12px;
+    border-radius: 14px;
+    font-size: 15px;
+    cursor: pointer;
+}
+</style>
+</head>
+
+<body>
+<div class="phone">
+    <div class="wallpaper" id="wallpaper"></div>
+
+    <div class="screen boot active" id="boot">
+        <div class="logo-wrap">
+            <div class="logo">
+                <span>L</span><span>a</span><span>g</span><span>o</span><span>n</span><span>O</span><span>S</span>
+            </div>
+            <div class="tagline">Let's Get It Started!</div>
+        </div>
+    </div>
+
+    <div class="status-bar">
+        <span id="time">--:--</span>
+        <div class="status-icons">
+            <div class="cell"><span></span><span></span><span></span><span></span></div>
+            <div class="wifi"><div class="wifi-dot"></div></div>
+            <div class="battery">
+                <div class="battery-body"><div class="battery-level" id="batteryLevel"></div></div>
+                <div class="battery-tip"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="screen" id="home">
+        <div class="home-grid" id="homeGrid"></div>
+        <div class="calendar-widget">
+            <div class="calendar-top">
+                <div class="calendar-title">📅 Calendar</div>
+                <div class="calendar-date" id="todayDate"></div>
+            </div>
+            <div class="calendar-midterm">
+                <div>Midterm Exam</div>
+                <div class="midterm-pill">17th</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="screen" id="quiz">
+        <div class="card">
+            <div id="quizTitle" class="quiz-title"></div>
+            <div id="question" class="question"></div>
+            <div class="buttons" id="answerButtons"></div>
+
+        </div>
+    </div>
+
+    <div class="tutorial" id="tutorial">
+        <div class="tutorial-box">
+            <h3>Welcome!👋</h3>
+            <p>Tap any app icon to practice questions for that unit.<br><br>Use the bottom bar to go back home.</p>
+            <button onclick="closeTutorial()">Got it</button>
+        </div>
+    </div>
+
+    <div class="nav-bar">
+        <div class="nav-pill" onclick="goHome()"></div>
+    </div>
+</div>
+
+<div class="screen" style="margin-top: 100px;" id="results">
+  <div class="card">
+    <h2 style="color:#4CAF50">🎉 Results</h2>
+    <div id="scoreText" class="question"></div>
+    <button onclick="goHome()" style="margin-top:16px;background:#4285F4">
+      Back Home
+    </button>
+  </div>
+</div>
+
+<script>
+
+function launchConfetti(){
+    for(let i=0;i<80;i++){
+        const c = document.createElement("div");
+        c.className = "confetti";
+        const phone = document.querySelector(".phone");
+        c.style.left = Math.random()*phone.clientWidth + "px";
+        c.style.background = `hsl(${Math.random()*360},90%,60%)`;
+        c.style.animationDuration = (2+Math.random()*2)+"s";
+        document.querySelector(".phone").appendChild(c);
+
+        setTimeout(()=>c.remove(),4000);
+    }
+}
+
+function showResults(){
+    document.getElementById("quiz").classList.remove("active");
+    document.getElementById("results").classList.add("active");
+
+    document.getElementById("scoreText").textContent =
+        `You scored ${score} / ${Math.min(questionLimit, questionsBySection[currentSection].length)}`;
+
+    launchConfetti();
+}
+
+/* BOOT SEQUENCE */
+setTimeout(() => {
+    document.getElementById("boot").classList.add("fade-out");
+    document.getElementById("wallpaper").style.opacity = 1;
+    setTimeout(() => {
+        document.getElementById("home").classList.add("active");
+        document.getElementById("tutorial").classList.add("show");
+        popIcons();
+    }, 750);
+}, 1600);
+
+/* TIME & DATE */
+function updateTime() {
+    const now = new Date();
+    document.getElementById("time").textContent =
+        now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+updateTime(); setInterval(updateTime, 1000);
+
+function updateDate() {
+    const now = new Date();
+    document.getElementById("todayDate").textContent =
+        now.toLocaleDateString([], { weekday: "short", month: "short", day: "numeric" });
+}
+updateDate(); setInterval(updateDate, 60000);
+
+/* BATTERY */
+function setBatteryColor(level, charging) {
+    const el = document.getElementById("batteryLevel");
+    if (level <= 0.15) el.style.background = "#E53935";
+    else if (charging) el.style.background = "#FBBC05";
+    else el.style.background = "#34A853";
+}
+
+if (navigator.getBattery) {
+    navigator.getBattery().then(b => {
+        const update = () => {
+            document.getElementById("batteryLevel").style.width = Math.round(b.level*100) + "%";
+            setBatteryColor(b.level, b.charging);
+        };
+        update();
+        b.addEventListener("levelchange", update);
+        b.addEventListener("chargingchange", update);
+    });
+} else {
+    document.getElementById("batteryLevel").style.width = "80%";
+    setBatteryColor(0.8, false);
+}
+
+let currentIndex = 0;
+let score = 0;
+let questionLimit = 40; // ← CHANGE THIS to control how many per topic
+
+
+/* HOME ICONS */
+const sections = [
+    { id: "lifecycle", name: "How Android Apps Work", icon: "📱" },
+    { id: "studio", name: "Android Studio/Project Structure", icon: "🛠️" },
+    { id: "events", name: "Event Handling", icon: "🖱️" },
+    { id: "views", name: "Views/Widgets/Layouts", icon: "🪟" },
+    { id: "intents", name: "Intents", icon: "🔀" },
+    { id: "viewmodel", name: "ViewModel/LiveData", icon: "📦" },
+    { id: "fragments", name: "Fragments", icon: "🧱" }
+];
+
+const questionsBySection = {
+
+lifecycle: [
+    {
+        text: "Kotlin and Java source files are compiled directly into a single binary .exe file for installation on Android devices.",
+        answer: false
+    },
+    {
+        text: "Which of the following is included in an Android application package (APK) file during the creation process?",
+        options: ["Only Java source code", "Compiled bytecode, libraries, and resources", "Only the Android Manifest", "System kernel files"],
+        answer: 1
+    },
+    {
+        text: "The onCreate() lifecycle method is always followed immediately by the onResume() state.",
+        answer: false
+    },
+    {
+        text: "Which lifecycle callback is the very first method triggered by the system when an application starts for the first time?",
+        options: ["onStart()", "onResume()", "onCreate()", "onRestart()"],
+        answer: 2
+    },
+    {
+        text: "Every activity used in an application must be explicitly declared within the AndroidManifest.xml file.",
+        answer: true
+    },
+    {
+        text: "Which powerful build system is used by Android Studio to automate the build process and manage project dependencies?",
+        options: ["Logcat", "Gradle", "Maven", "IntelliJ"],
+        answer: 1
+    },
+    {
+        text: "Toast messages are considered highly reliable tools for debugging code execution inside the onDestroy() method.",
+        answer: false
+    },
+    {
+        text: "Which lifecycle state indicates that an activity is about to become visible to the user but is not yet interactive?",
+        options: ["onCreate()", "onResume()", "onStart()", "onPause()"],
+        answer: 2
+    },
+    {
+        text: "The res/drawable folder in an Android project is typically where the XML layout files for activities are stored.",
+        answer: false
+    },
+    {
+        text: "Before being packaged into an APK, Kotlin and Java source files are first compiled into what form?",
+        options: ["Machine code", "Bytecode", "XML", "JSON"],
+        answer: 1
+    },
+    {
+        text: "Logcat is a command-line tool that allows developers to view system messages and stack traces when an app crashes.",
+        answer: true
+    },
+    {
+        text: "When a user presses the Home button while an app is open, which lifecycle callback is triggered first?",
+        options: ["onStop()", "onPause()", "onDestroy()", "onRestart()"],
+        answer: 1
+    },
+    {
+        text: "An APK file stands for 'Android Package Kit' in the official Android documentation.",
+        answer: false
+    },
+    {
+        text: "If an activity has been stopped but not yet destroyed, which method is called when the user navigates back to it?",
+        options: ["onCreate()", "onRestart()", "onPause()", "onDestroy()"],
+        answer: 1
+    },
+    {
+        text: "Unlike standard console applications, Android apps are initiated by the system invoking specific callback methods rather than a main() method.",
+        answer: true
+    },
+    {
+        text: "Which Logcat priority level provides the most detailed information and shows all log messages with the least filtering?",
+        options: ["DEBUG (D)", "INFO (I)", "VERBOSE (V)", "ASSERT (A)"],
+        answer: 2
+    },
+    {
+        text: "Android projects typically contain two separate build.gradle files: one for the overall project and one for each module.",
+        answer: true
+    },
+    {
+        text: "What is the ideal location for performing most initialization tasks when an activity is first created?",
+        options: ["onStart()", "onResume()", "onCreate()", "onRestart()"],
+        answer: 2
+    },
+    {
+        text: "View binding is a feature that simplifies interaction with UI elements by generating a binding class for each XML layout file.",
+        answer: true
+    },
+    {
+        text: "Which tool should a developer use to filter system logs by app name or severity level during a debug session?",
+        options: ["Project Window", "Layout Editor", "Logcat", "Device Manager"],
+        answer: 2
+    },
+    {
+        text: "The Android runtime system always guarantees that a call will be made to onDestroy() whenever an activity is terminated.",
+        answer: false
+    },
+    {
+        text: "Which specific XML file does the MainActivity typically use to define its user interface layout?",
+        options: ["manifest.xml", "strings.xml", "activity_main.xml", "themes.xml"],
+        answer: 2
+    },
+    {
+        text: "The binary installation file produced for Android devices is called an IPA, while iOS devices use the APK format.",
+        answer: false
+    },
+    {
+        text: "Which lifecycle state indicates that the activity is at the top of the stack and the user is currently interacting with it?",
+        options: ["onStart()", "onResume()", "onCreate()", "onRestart()"],
+        answer: 1
+    },
+    {
+        text: "A Fragment represents a reusable portion of an app's UI and must be hosted by an activity or another fragment.",
+        answer: true
+    },
+    {
+        text: "What type of object is passed to onCreate() to potentially restore dynamic state information from a previous session?",
+        options: ["Intent", "Context", "Bundle", "Layout"],
+        answer: 2
+    },
+    {
+        text: "The ASSERT (A) log level in Logcat is intended for general informational messages that highlight the app's progress.",
+        answer: false
+    },
+    {
+        text: "What is the primary function of the strings.xml file within the resource values folder?",
+        options: ["To store image paths", "To define the UI layout structure", "To centralize and manage text strings in one location", "To manage network dependencies"],
+        answer: 2
+    },
+    {
+        text: "CPU intensive tasks, such as running animations, should be stopped in the onPause() method to avoid UI transition delays.",
+        answer: true
+    },
+    {
+        text: "Which lifecycle method is always called immediately following a call to onRestart()?",
+        options: ["onCreate()", "onResume()", "onStart()", "onStop()"],
+        answer: 2
+    },
+    {
+        text: "When using a virtual device, Android Studio will wait for the emulator to be active before attempting to install the APK.",
+        answer: true
+    },
+    {
+        text: "In the Android Manifest, within which element should an <activity> tag be nested?",
+        options: ["<manifest>", "<application>", "<activity-group>", "<resources>"],
+        answer: 1
+    },
+    {
+        text: "Filtering Logcat messages using 'tag:tagname' allows a developer to isolate specific events logged within their code.",
+        answer: true
+    },
+    {
+        text: "Into which final binary format does the Android build process package compiled code, libraries, and assets for distribution?",
+        options: ["Bytecode file", "EXE file", "APK file", "JAR file"],
+        answer: 2
+    },
+    {
+        text: "In Android development, an 'Activity' is described as representing a single screen in an application.",
+        answer: true
+    },
+    {
+        text: "What is a primary benefit of using a ViewModel class in an Android application architecture?",
+        options: ["It handles network calls automatically", "It manages the Android Manifest", "It persists UI-related data through configuration changes like rotation", "It defines the XML layout structure"],
+        answer: 2
+    },
+    {
+        text: "If the system needs memory for an app with higher priority, it may kill a background process that is currently in the onStop() state.",
+        answer: true
+    },
+    {
+        text: "What is a 'Toast' in the context of Android development?",
+        options: ["A background service", "A short-lived notification pop-up providing simple feedback", "A type of database storage", "A layout container for buttons"],
+        answer: 1
+    },
+    {
+        text: "The correct sequence of lifecycle calls when an app is first launched is onStart(), then onCreate(), then onResume().",
+        answer: false
+    },
+    {
+        text: "When an application is compiled, how is a View's identifier (ID) referenced by the system internally?",
+        options: ["As a string", "As an integer", "As a boolean", "As a binary file"],
+        answer: 1
+    }
+],
+
+
+studio: [
+    {
+        text: "Android Studio uses a build system called Gradle to manage dependencies and automate the build process.",
+        answer: true
+    },
+    {
+        text: "Which part of the Android Studio anatomy displays the status of your project and the IDE itself, as well as warnings or messages?",
+        options: ["The toolbar", "The status bar", "The navigation bar", "The tool window bar"],
+        answer: 1
+    },
+    {
+        text: "The AndroidManifest.xml file, located at the root of the project source set, describes essential information about the app to the Android build tools and operating system.",
+        answer: true
+    },
+    {
+        text: "In which project folder are your application launcher icons specifically stored?",
+        options: ["drawable", "layout", "mipmap", "values"],
+        answer: 2
+    },
+    {
+        text: "Toast messages are considered highly reliable for debugging code execution within the onDestroy() lifecycle method.",
+        answer: false
+    },
+    {
+        text: "Which Logcat priority level provides the least amount of filtering and the most detailed information?",
+        options: ["DEBUG (D)", "INFO (I)", "VERBOSE (V)", "ASSERT (A)"],
+        answer: 2
+    },
+    {
+        text: "The Editor Gutter Area is used by the Android Studio editor to display informational icons and controls.",
+        answer: true
+    },
+    {
+        text: "Which folder in an Android project structure is used to store XML files that define the structure of your user interface?",
+        options: ["res/drawable", "res/layout", "res/values", "res/xml"],
+        answer: 1
+    },
+    {
+        text: "Gradle makes it easy to add external libraries to your project by automatically downloading them when specified in the build.gradle file.",
+        answer: true
+    },
+    {
+        text: "What is the keyboard shortcut used in Android Studio to quickly access the 'Override Methods' menu?",
+        options: ["Control + C", "Control + O", "Control + S", "Control + P"],
+        answer: 1
+    },
+    {
+        text: "The Android Studio Editor appears when a Java, Kotlin, XML, or other based file is selected for editing.",
+        answer: true
+    },
+    {
+        text: "What is the primary function of the Logcat tool in Android development?",
+        options: ["To design UI layouts", "To view system messages and stack traces", "To manage project dependencies", "To create virtual devices"],
+        answer: 1
+    },
+    {
+        text: "The 'App Restart' button in Android Studio recompiles the Java file and refreshes the screen without restarting the entire simulator.",
+        answer: true
+    },
+    {
+        text: "Which editor view allows a developer to see the XML code on one side and the visual Design view on the other?",
+        options: ["Code view", "Design view", "Split view", "Attributes view"],
+        answer: 2
+    },
+    {
+        text: "The res/drawable folder should contain the different types of images used for the development of the application.",
+        answer: true
+    },
+    {
+        text: "How can you search for a specific IDE action, element of the UI, or source code at any time in Android Studio?",
+        options: ["Right-click the Gutter Area", "Double-press the Shift key", "Check the Status Bar", "Look in the Palette"],
+        answer: 1
+    },
+    {
+        text: "The Navigation Bar provides a compact view of the project structure and helps you open files for editing.",
+        answer: true
+    },
+    {
+        text: "Which file in the res/values folder is used to manage and centralize text strings to make the project less messy?",
+        options: ["colors.xml", "themes.xml", "strings.xml", "styles.xml"],
+        answer: 2
+    },
+    {
+        text: "Breakpoints can be set in Android Studio to pause code execution for debugging purposes.",
+        answer: true
+    },
+    {
+        text: "What does the Android build process package into the final APK file?",
+        options: ["Only source code", "Compiled bytecode, libraries, and resources", "Only XML layout files", "The entire Java Virtual Machine"],
+        answer: 1
+    },
+    {
+        text: "The Status Bar is located at the top of the Android Studio interface, directly above the Navigation Bar.",
+        answer: false
+    },
+    {
+        text: "Which layout type is intended to create large, complex layouts with a flat view hierarchy and no nested view groups?",
+        options: ["LinearLayout", "RelativeLayout", "ConstraintLayout", "FrameLayout"],
+        answer: 2
+    },
+    {
+        text: "Logcat allows developers to filter log messages using the 'tag:tagname' syntax.",
+        answer: true
+    },
+    {
+        text: "Which unit of measurement is recommended for text sizing because it scales with both screen resolution and user preference?",
+        options: ["px", "dp", "sp", "pt"],
+        answer: 2
+    },
+    {
+        text: "Android projects typically contain two important Build.gradle files: one for the project level and one for each module.",
+        answer: true
+    },
+    {
+        text: "Where can you find visual widgets like Buttons and TextViews to drag and drop into your layout in the Layout Editor?",
+        options: ["Attributes pane", "Project window", "Palette", "Logcat"],
+        answer: 2
+    },
+    {
+        text: "The Validation and Marker Sidebar shows markers for errors, warnings, and other code-related information.",
+        answer: true
+    },
+    {
+        text: "Which Logcat priority level is specifically used for fatal errors or situations that should never happen?",
+        options: ["ERROR (E)", "WARN (W)", "INFO (I)", "ASSERT (A)"],
+        answer: 3
+    },
+    {
+        text: "The Georgian network is described as having potential impacts on how quickly Android Studio imports and downloads project components.",
+        answer: true
+    },
+    {
+        text: "When an app is compiled, how is a View's unique ID referenced by the system internally?",
+        options: ["As a string", "As an integer", "As a binary file", "As a boolean"],
+        answer: 1
+    },
+    {
+        text: "The Attributes pane in the Layout Editor allows you to filter attributes by typing specific keywords into a search bar.",
+        answer: true
+    },
+    {
+        text: "What happens to an Activity when the device orientation changes, such as rotating from portrait to landscape?",
+        options: ["It pauses temporarily", "It is destroyed and recreated", "Nothing happens", "It enters the onRestart state"],
+        answer: 1
+    },
+    {
+        text: "The drawable folder is the standard location for storing XML layout files.",
+        answer: false
+    },
+    {
+        text: "What is the primary purpose of the Bundle object passed to lifecycle methods like onCreate()?",
+        options: ["To store image resources", "To hold dynamic state information from a prior invocation", "To connect to external APIs", "To define the app's theme"],
+        answer: 1
+    },
+    {
+        text: "Windows Defender may prompt users with a pop-up that, if not accepted, could bog down the performance of the system or simulator.",
+        answer: true
+    },
+    {
+        text: "Which method is used in the Java activity file to obtain a reference to a specific widget defined in the XML layout?",
+        options: ["setContentView()", "findViewById()", "onCreate()", "onStart()"],
+        answer: 1
+    },
+    {
+        text: "Styles and themes allow developers to separate design details from UI structure and behavior.",
+        answer: true
+    },
+    {
+        text: "What occurs when a user presses the Home button on the Android device while an app is active?",
+        options: ["onDestroy() is called immediately", "The activity enters the onPause() state", "The activity stays in onResume()", "The phone restarts"],
+        answer: 1
+    },
+    {
+        text: "The Palette is where you go to change the specific properties (like text color or size) of a UI widget.",
+        answer: false
+    },
+    {
+        text: "What common naming format is used for Android package names to ensure uniqueness across the platform?",
+        options: ["Pascal Case", "Camel Case", "Reverse URL", "Standard URL"],
+        answer: 2
+    }
+],
+
+
+events: [
+    {
+        text: "An event listener is an interface in the View class that contains a single callback method called by the framework when a UI item is triggered by user interaction.",
+        answer: true
+    },
+    {
+        text: "Which of the following is defined as the method that actually handles an event after a listener is triggered?",
+        options: ["Event Listener", "Event Handler", "Event Registration", "Event Manager"],
+        answer: 1
+    },
+    {
+        text: "Event Registration is the specific process by which an Event Handler gets linked with an Event Listener so the handler is called when the event fires.",
+        answer: true
+    },
+    {
+        text: "The onClick() callback is triggered when a user performs which action?",
+        options: ["Sustained long click", "Focusing on an item with navigation keys", "Touching the item while in touch mode", "Both the second and third options"],
+        answer: 3
+    },
+    {
+        text: "The onLongClick() method is called when a user touches and holds an item for a duration of at least one second.",
+        answer: true
+    },
+    {
+        text: "Which callback method is specifically invoked when a user navigates onto or away from a UI item using hardware navigation keys?",
+        options: ["onKey()", "onFocusChange()", "onTouch()", "onClick()"],
+        answer: 1
+    },
+    {
+        text: "The onKey() callback method is triggered when the user is focused on an item and presses or releases a hardware key on the device.",
+        answer: true
+    },
+    {
+        text: "Which method is used to capture touch events including presses, releases, and movement gestures within the bounds of a UI item?",
+        options: ["onClick()", "onKey()", "onLongClick()", "onTouch()"],
+        answer: 3
+    },
+    {
+        text: "A Context Menu is typically built as the result of a sustained 'long click' using the onCreateContextMenu() callback.",
+        answer: true
+    },
+    {
+        text: "The findViewById() method returns which of the following after searching for a widget defined in an XML layout?",
+        options: ["A string value", "A boolean flag", "A reference to the view object", "A layout identifier"],
+        answer: 2
+    },
+    {
+        text: "The setOnClickListener() method can accept an object from any class as long as that class implements the OnClickListener interface.",
+        answer: true
+    },
+    {
+        text: "A Java anonymous class is best described as which of the following?",
+        options: ["A class with multiple instances", "An inner class without a name", "A class that must be formally subclassed", "A class used for global variables"],
+        answer: 1
+    },
+    {
+        text: "Only a single object is created for any given Java anonymous inner class definition.",
+        answer: true
+    },
+    {
+        text: "What is a primary benefit of using anonymous inner classes for small, one-time implementations?",
+        options: ["Faster network connectivity", "Automatic memory management", "Conciseness by defining and instantiating in one expression", "Support for older Android API levels"],
+        answer: 2
+    },
+    {
+        text: "Using anonymous inner classes can keep code self-contained and localized when the implementation is closely related to a specific context.",
+        answer: true
+    },
+    {
+        text: "Which interface is used to define a command that can be executed on a thread at some point in the future?",
+        options: ["View.OnClickListener", "Runnable", "OnCheckedChangeListener", "EventRegistration"],
+        answer: 1
+    },
+    {
+        text: "The Runnable interface contains a single abstract method called run() that a developer must implement to define a task.",
+        answer: true
+    },
+    {
+        text: "Once an anonymous class is instantiated, what can a developer do to reference it later in the code?",
+        options: ["Assign the instance to a variable", "Create it inline only", "Use the class name to call it", "Re-instantiate it every time"],
+        answer: 0
+    },
+    {
+        text: "Creating an instance of a listener 'inline' allows a developer to avoid assigning the instance to a specific variable.",
+        answer: true
+    },
+    {
+        text: "Where in the Android Studio interface can a developer bind an event handler directly to a widget using the 'onClick' attribute?",
+        options: ["Logcat console", "Device Manager", "Layout editor Attributes pane", "Gradle Scripts folder"],
+        answer: 2
+    },
+    {
+        text: "The OnCheckedChangeListener interface is used specifically to handle state changes for widgets like Switches and CheckBoxes.",
+        answer: true
+    },
+    {
+        text: "In the onCheckedChanged callback, which parameter provides the new status of the toggle widget?",
+        options: ["buttonView", "isChecked", "v", "state"],
+        answer: 1
+    },
+    {
+        text: "View Binding is a feature that replaces the traditional findViewById method to simplify interaction with UI elements.",
+        answer: true
+    },
+    {
+        text: "How does the system generate the name of a binding class from an XML layout file called 'result_profile.xml'?",
+        options: ["Result_profileBinding", "ProfileBindingResult", "ResultProfileBinding", "BindingResultProfile"],
+        answer: 2
+    },
+    {
+        text: "Every generated binding class includes a getRoot() method that provides a direct reference to the root view of the layout.",
+        answer: true
+    },
+    {
+        text: "To set the binding as the active view in an activity's onCreate method, which method must be called?",
+        options: ["setContentView()", "findViewById()", "inflate()", "observe()"],
+        answer: 0
+    },
+    {
+        text: "The Runnable interface is part of the standard Java language (java.lang.Runnable) and is widely used in Android development.",
+        answer: true
+    },
+    {
+        text: "Which method is specifically used to ensure that code inside a Runnable is executed on the UI thread from a background thread?",
+        options: ["Thread.start()", "Handler.postDelayed()", "Activity.runOnUiThread()", "View.inflate()"],
+        answer: 2
+    },
+    {
+        text: "A Handler object allows developers to send and process Runnable objects associated with a thread's MessageQueue.",
+        answer: true
+    },
+    {
+        text: "Which class provides methods to post Runnable objects to the message queue of the UI thread to update elements?",
+        options: ["View", "Bundle", "Intent", "ViewModel"],
+        answer: 0
+    },
+    {
+        text: "The handler.postDelayed() method can be used to execute a Runnable after a specified amount of time in milliseconds.",
+        answer: true
+    },
+    {
+        text: "Which of the following is NOT one of the three core concepts related to Android Event Management?",
+        options: ["Event Listeners", "Event Handlers", "Event Broadcasting", "Event Listeners Registration"],
+        answer: 2
+    },
+    {
+        text: "Anonymous inner classes are useful when making an instance of an object with 'extras,' such as overloading methods, without formally subclassing.",
+        answer: true
+    },
+    {
+        text: "When implementing the onClick(View v) method, what does the parameter 'v' represent?",
+        options: ["The current Activity", "The UI item that was clicked", "The layout container", "The application context"],
+        answer: 1
+    },
+    {
+        text: "All GUI elements in Android are subclasses of the View object, which serves as the base class for all widgets.",
+        answer: true
+    },
+    {
+        text: "Which method is the ideal location to perform initial event listener registration for an Activity?",
+        options: ["onStart()", "onResume()", "onCreate()", "onPause()"],
+        answer: 2
+    },
+    {
+        text: "The setText() method can be called on a TextView reference from within an Event Handler to update the UI text.",
+        answer: true
+    },
+    {
+        text: "When an application is compiled, how is a View's identifier (ID) referenced by the system internally?",
+        options: ["As a string", "As an integer", "As a binary file", "As an object reference"],
+        answer: 1
+    },
+    {
+        text: "A ViewModel class provides a convenient API for data persistence that survives activity destruction during screen rotation.",
+        answer: true
+    },
+    {
+        text: "What is the primary function of the strings.xml file in event-driven applications?",
+        options: ["To handle button clicks", "To centralize and manage text resources to make the project less messy", "To define the application lifecycle", "To manage network dependencies"],
+        answer: 1
+    }
+],
+
+
+views: [
+    {
+        text: "A View usually draws something the user can see and interact with, while a ViewGroup is an invisible container defining the layout structure.",
+        answer: true
+    },
+    {
+        text: "Which ViewGroup allows you to create large, complex layouts with a flat view hierarchy and no nested view groups?",
+        options: ["LinearLayout", "RelativeLayout", "ConstraintLayout", "FrameLayout"],
+        answer: 2
+    },
+    {
+        text: "The 'wrap_content' constant tells your view to become as big as its parent view group will allow.",
+        answer: false
+    },
+    {
+        text: "Which unit of measurement is recommended for text sizing because it scales with both screen resolution and user preference?",
+        options: ["px", "dp", "sp", "pt"],
+        answer: 2
+    },
+    {
+        text: "All Android GUI elements, including widgets and layouts, are subclasses of the View object.",
+        answer: true
+    },
+    {
+        text: "Which layout organizes its children into a single horizontal or vertical row?",
+        options: ["RelativeLayout", "LinearLayout", "GridLayout", "ConstraintLayout"],
+        answer: 1
+    },
+    {
+        text: "A 'Style' is a collection of attributes that is applied to an entire app or activity rather than an individual view.",
+        answer: false
+    },
+    {
+        text: "Which common view is specifically used to display a formatted text label?",
+        options: ["Button", "ImageView", "TextView", "EditText"],
+        answer: 2
+    },
+    {
+        text: "Every layout XML file must contain exactly one root element, which must be either a View or a ViewGroup object.",
+        answer: true
+    },
+    {
+        text: "Which attribute is used to uniquely identify a View within the layout tree so it can be accessed in Java or Kotlin code?",
+        options: ["android:name", "android:id", "android:tag", "android:text"],
+        answer: 1
+    },
+    {
+        text: "The unit 'dp' stands for Scale-Independent Pixels and is used primarily for text sizing.",
+        answer: false
+    },
+    {
+        text: "Which type of object behaves as a middleman between a data source and an AdapterView layout like ListView?",
+        options: ["Intent", "ViewModel", "Adapter", "Fragment"],
+        answer: 2
+    },
+    {
+        text: "View Binding is a feature that simplifies interaction with UI elements and largely replaces the need for 'findViewById'.",
+        answer: true
+    },
+    {
+        text: "Which layout type enables you to specify the location of child objects relative to each other or the parent?",
+        options: ["LinearLayout", "ConstraintLayout", "RelativeLayout", "Web View"],
+        answer: 2
+    },
+    {
+        text: "Fragments are reusable portions of UI that must be hosted by an activity or another fragment to live.",
+        answer: true
+    },
+    {
+        text: "What is the result of using 'match_parent' for a view's layout_width?",
+        options: [
+            "The view shrinks to fit its text",
+            "The view becomes as big as its parent allows",
+            "The view maintains a fixed pixel width",
+            "The view matches the size of its siblings"
+        ],
+        answer: 1
+    },
+    {
+        text: "In a vertical LinearLayout, elements are arranged one below the other.",
+        answer: true
+    },
+    {
+        text: "Which common widget provides an editable text field for user input?",
+        options: ["TextView", "ListView", "EditText", "ImageView"],
+        answer: 2
+    },
+    {
+        text: "The geometry of a view is that of a rectangle, expressed as a pair of coordinates and two dimensions.",
+        answer: true
+    },
+    {
+        text: "Which ViewGroup allows users to flip left and right through pages of data, often used in apps like YouTube or Snapchat?",
+        options: ["ViewPager", "RecyclerView", "ListView", "GridView"],
+        answer: 0
+    },
+    {
+        text: "Styles and themes are typically declared in a resource file located in res/values/, usually named styles.xml.",
+        answer: true
+    },
+    {
+        text: "When the app is compiled, how is a View's ID referenced internally by the Android system?",
+        options: ["As a string", "As a boolean", "As an integer", "As an XML tag"],
+        answer: 2
+    },
+    {
+        text: "A 'Theme' can apply styles to non-view elements, such as the status bar and window background.",
+        answer: true
+    },
+    {
+        text: "Which component is responsible for adding, removing, or replacing fragments at runtime?",
+        options: ["Intent", "FragmentManager", "ViewBinding", "Adapter"],
+        answer: 1
+    },
+    {
+        text: "ConstraintLayout is described as being more flexible than RelativeLayout and easier to use with the Layout Editor.",
+        answer: true
+    },
+    {
+        text: "Which specific layout is used to display web pages within an Android application?",
+        options: ["Web View", "GridView", "ListView", "FrameLayout"],
+        answer: 0
+    },
+    {
+        text: "The 'textSize' attribute is a common attribute inherited from the root View class by all objects.",
+        answer: false
+    },
+    {
+        text: "Which class is used in conjunction with ViewPager2 to manage and display fragments efficiently?",
+        options: ["FragmentTransaction", "FragmentStateAdapter", "ViewModel", "LayoutManager"],
+        answer: 1
+    },
+    {
+        text: "Scale-Independent Pixels (sp) scale for both screen resolution and user font-size preference.",
+        answer: true
+    },
+    {
+        text: "Where can you find visual widgets like Buttons and Switches to drag into your layout in Android Studio?",
+        options: ["Attributes pane", "Palette", "Project window", "Logcat"],
+        answer: 1
+    },
+    {
+        text: "The 'values-night' directory is used to provide alternative color resources specifically for dark mode themes.",
+        answer: true
+    },
+    {
+        text: "Which method is called in the generated binding class to create an instance for an activity to use?",
+        options: ["findViewById()", "inflate()", "setContentView()", "getRoot()"],
+        answer: 1
+    },
+    {
+        text: "Prior to fragments, Android developers could only show a single activity on the screen at one given point in time.",
+        answer: true
+    },
+    {
+        text: "Which constant tells a view to size itself exactly to the dimensions required by its content?",
+        options: ["match_parent", "fill_parent", "wrap_content", "fixed_size"],
+        answer: 2
+    },
+    {
+        text: "A layout defines the structure for a user interface and is built using a hierarchy of View and ViewGroup objects.",
+        answer: true
+    },
+    {
+        text: "In the context of layouts, what do attributes named 'layout_something' represent?",
+        options: ["Widget properties", "Layout parameters", "Global themes", "System permissions"],
+        answer: 1
+    },
+    {
+        text: "The 'id' attribute is common to all View objects because it is inherited from the root View class.",
+        answer: true
+    },
+    {
+        text: "Which widget is best suited for displaying an image resource in the UI?",
+        options: ["TextView", "Button", "ImageView", "ListView"],
+        answer: 2
+    },
+    {
+        text: "When a user rotates the device, the current Activity is typically destroyed and recreated, making ViewModel useful for persisting state.",
+        answer: true
+    },
+    {
+        text: "Which unit should be used for non-text items like view sizing, margins, and padding?",
+        options: ["px", "sp", "pt", "dp"],
+        answer: 3
+    }
+],
+
+
+intents: [
+    {
+        text: "An Intent is a messaging object used to request an action from another app component.",
+        answer: true
+    },
+    {
+        text: "Which of the following is NOT one of the three fundamental use cases for an Intent mentioned in the sources?",
+        options: ["Starting an activity", "Starting a service", "Delivering a broadcast", "Closing a database connection"],
+        answer: 3
+    },
+    {
+        text: "Explicit intents are typically used to start a component within your own app because you know the specific class name.",
+        answer: true
+    },
+    {
+        text: "To start a new instance of an Activity, which method should you pass an Intent to?",
+        options: ["runActivity()", "startActivity()", "executeIntent()", "launchComponent()"],
+        answer: 1
+    },
+    {
+        text: "Implicit intents do not name a specific component but instead declare a general action to perform.",
+        answer: true
+    },
+    {
+        text: "When an implicit intent is used, how does the Android system find the appropriate component to start?",
+        options: [
+            "By searching the device's web history",
+            "By comparing intent contents to intent filters in other apps' manifest files",
+            "By randomly selecting an installed application",
+            "By asking the user to type the class name"
+        ],
+        answer: 1
+    },
+    {
+        text: "If you want to receive a result from an activity when it finishes, you should call startActivityForResult().",
+        answer: true
+    },
+    {
+        text: "In which callback method does your activity receive the result from a finished activity started for a result?",
+        options: ["onCreate()", "onStart()", "onActivityResult()", "onResume()"],
+        answer: 2
+    },
+    {
+        text: "The syntax 'new Intent(this, TargetActivity.class)' is used to create an explicit intent.",
+        answer: true
+    },
+    {
+        text: "Which standard action is used to create an intent for sharing text content with other apps?",
+        options: ["Intent.ACTION_VIEW", "Intent.ACTION_SEND", "Intent.ACTION_EDIT", "Intent.ACTION_MAIN"],
+        answer: 1
+    },
+    {
+        text: "The Android Sharesheet is primarily designed for sending content outside your app or directly to another user.",
+        answer: true
+    },
+    {
+        text: "Which method is called to display the Android Sharesheet by passing it an Intent object?",
+        options: ["Intent.showSharesheet()", "Intent.createChooser()", "Intent.openResolver()", "Intent.startShare()"],
+        answer: 1
+    },
+    {
+        text: "The Android intent resolver is best suited for passing data to the next stage of a well-defined task, such as opening a PDF.",
+        answer: true
+    },
+    {
+        text: "What information must you specify when constructing an intent to send data between activities?",
+        options: ["The action to perform", "The data and its type", "The process ID", "Both the first and second options"],
+        answer: 3
+    },
+    {
+        text: "Android uses intents and their associated 'extras' to let users share information easily using their favorite apps.",
+        answer: true
+    },
+    {
+        text: "Which method is used to add additional data, like a text string, to an Intent object?",
+        options: ["setData()", "setType()", "putExtra()", "setAction()"],
+        answer: 2
+    },
+    {
+        text: "An implicit intent will show a dialog to the user if multiple intent filters are compatible with the requested action.",
+        answer: true
+    },
+    {
+        text: "What is the principal advantage of using the Android Sharesheet over custom sharing solutions?",
+        options: [
+            "It is faster than explicit intents",
+            "It uses relevant app suggestions based on system-only information",
+            "It bypasses the Android Manifest",
+            "It does not require an internet connection"
+        ],
+        answer: 1
+    },
+    {
+        text: "Intent filters are declared in an app's manifest file to notify the system which implicit intents the app can handle.",
+        answer: true
+    },
+    {
+        text: "Which of the following describes an 'Activity' in the context of intents?",
+        options: [
+            "A background download service",
+            "A single screen in an app",
+            "A manifest file configuration",
+            "A message sent between components"
+        ],
+        answer: 1
+    },
+    {
+        text: "The 'text/plain' MIME type is commonly used when sharing simple text content through an Intent.",
+        answer: true
+    },
+    {
+        text: "What happens if only one activity on the device can handle an intent passed through the intent resolver?",
+        options: [
+            "The system displays a selection dialog anyway",
+            "The activity starts immediately",
+            "The app crashes with an ActivityNotFoundException",
+            "The intent is cancelled"
+        ],
+        answer: 1
+    },
+    {
+        text: "You can use an explicit intent to start a service that downloads a file in the background.",
+        answer: true
+    },
+    {
+        text: "Which component receives the result of a finished activity as a separate Intent object?",
+        options: ["The Android System", "The calling activity", "The Android Manifest", "The background service"],
+        answer: 1
+    },
+    {
+        text: "Implicit intents can be used to request that another capable app show a specific location on a map.",
+        answer: true
+    },
+    {
+        text: "What code block should you use to handle situations where no activity on the device can satisfy an implicit intent?",
+        options: ["if-else block", "try-catch with ActivityNotFoundException", "while loop", "switch statement"],
+        answer: 1
+    },
+    {
+        text: "The Intent object describes the activity to start and carries any necessary data.",
+        answer: true
+    },
+    {
+        text: "When starting an activity explicitly, why does the system start the component immediately?",
+        options: [
+            "Because it doesn't need to check permissions",
+            "Because the Intent object names the specific activity component",
+            "Because explicit intents are always faster than implicit ones",
+            "Because the manifest file is not required for explicit intents"
+        ],
+        answer: 1
+    },
+    {
+        text: "The 'extra' data associated with intents is often used to pass information between activities.",
+        answer: true
+    },
+    {
+        text: "In the explicit intent example provided in the source, what is being passed to the service using 'setData'?",
+        options: ["A file path", "A parsed Uri representing a file URL", "A boolean flag", "A layout resource ID"],
+        answer: 1
+    },
+    {
+        text: "Explicit intents facilitate communication between components by specifying the target app's package name.",
+        answer: true
+    },
+    {
+        text: "Which method returns a version of your intent that always displays the Android Sharesheet?",
+        options: ["startActivity()", "createChooser()", "setResult()", "getIntent()"],
+        answer: 1
+    },
+    {
+        text: "In a 'Lucky Number App', an intent can be used to launch a second activity and share the generated number.",
+        answer: true
+    },
+    {
+        text: "According to the Week 4 syllabus, which topic is covered alongside Intents?",
+        options: ["Fragments", "Navigation", "Networking", "Security"],
+        answer: 1
+    },
+    {
+        text: "The Android system finds appropriate components for implicit intents by comparing contents against intent filters.",
+        answer: true
+    },
+    {
+        text: "What type of object is 'this' when used as the first parameter in 'new Intent(this, Target.class)' within an Activity?",
+        options: ["Intent", "Context", "Bundle", "Service"],
+        answer: 1
+    },
+    {
+        text: "An implicit intent names exactly which app component should handle the request.",
+        answer: false
+    },
+    {
+        text: "Which constant is used as a key for adding plain text to a share intent?",
+        options: ["Intent.EXTRA_DATA", "Intent.EXTRA_TEXT", "Intent.EXTRA_STRING", "Intent.TEXT_PLAIN"],
+        answer: 1
+    },
+    {
+        text: "Using 'Intent.createChooser(sendIntent, null)' will suggest targets that might be unavailable to custom solutions.",
+        answer: true
+    },
+    {
+        text: "Intents can be used to facilitate communication between components across process boundaries.",
+        answer: true
+    }
+],
+
+
+viewmodel: [
+    {
+        text: "The ViewModel class is designed to cache and persist state through configuration changes, such as when a user rotates the screen.",
+        answer: true
+    },
+    {
+        text: "Which class provides a convenient API for data persistence that ensures UI data is not lost when navigating between activities?",
+        options: ["Intent", "Bundle", "ViewModel", "Activity"],
+        answer: 2
+    },
+    {
+        text: "LiveData is an observable data holder class that only updates observers that are in an active lifecycle state, such as STARTED or RESUMED.",
+        answer: true
+    },
+    {
+        text: "Which method is used to instantiate a ViewModel within an activity's onCreate() method?",
+        options: ["ViewModelFactory", "ViewModelProvider", "ViewModelBuilder", "ViewModelManager"],
+        answer: 1
+    },
+    {
+        text: "Using LiveData helps prevent memory leaks because observers are bound to lifecycle objects and clean up after themselves.",
+        answer: true
+    },
+    {
+        text: "To update the data held by a MutableLiveData object from a background thread, which method should be used?",
+        options: ["setValue(T)", "updateValue(T)", "postValue(T)", "sendValue(T)"],
+        answer: 2
+    },
+    {
+        text: "The ViewModel class is the ideal location for encapsulating business logic and acting as a screen-level state holder.",
+        answer: true
+    },
+    {
+        text: "What is the name of the binding class generated for a layout file named 'result_profile.xml' when View Binding is enabled?",
+        options: ["Result_profileBinding", "ProfileBindingResult", "ResultProfileBinding", "BindingResultProfile"],
+        answer: 2
+    },
+    {
+        text: "LiveData follows the observer pattern, notifying Observer objects when underlying data changes so the UI can be updated.",
+        answer: true
+    },
+    {
+        text: "Which method must be called to start observing a MutableLiveData instance from an activity?",
+        options: ["watch()", "observe()", "listen()", "subscribe()"],
+        answer: 1
+    },
+    {
+        text: "ViewModel instances are destroyed immediately when an activity is recreated due to a configuration change.",
+        answer: false
+    },
+    {
+        text: "Which interface represents a command that can be executed on a thread at some point in the future?",
+        options: ["Runnable", "Handler", "Observer", "ViewModel"],
+        answer: 0
+    },
+    {
+        text: "LiveData is aware of the lifecycle of its observer, ensuring updates are only sent if the component is active.",
+        answer: true
+    },
+    {
+        text: "Which method in the View Binding class provides a direct reference to the root view of the corresponding layout file?",
+        options: ["inflate()", "setContentView()", "getRoot()", "findRoot()"],
+        answer: 2
+    },
+    {
+        text: "The setValue(T) method in MutableLiveData triggers observers immediately and must be called from the main thread.",
+        answer: true
+    },
+    {
+        text: "Which tool allows developers to send and process Runnable objects associated with a thread's MessageQueue?",
+        options: ["ViewModel", "Handler", "Intent", "Bundle"],
+        answer: 1
+    },
+    {
+        text: "In Android development, a Runnable contains a single abstract method called run() that must be implemented.",
+        answer: true
+    },
+    {
+        text: "What is a primary benefit of using ViewModel over a plain data-holding class?",
+        options: [
+            "It automatically handles networking",
+            "It persists UI state through configuration changes",
+            "It replaces the need for an Android Manifest",
+            "It speeds up APK creation"
+        ],
+        answer: 1
+    },
+    {
+        text: "To enable View Binding in a module, you must set 'viewBinding = true' within the module-level build.gradle file.",
+        answer: true
+    },
+    {
+        text: "Which method is specifically used to ensure that background thread code updates the UI elements on the UI thread?",
+        options: ["postDelayed()", "Thread.start()", "runOnUiThread()", "handler.post()"],
+        answer: 2
+    },
+    {
+        text: "LiveData requires developers to manually stop observation when an activity enters the back stack to avoid crashes.",
+        answer: false
+    },
+    {
+        text: "Which design pattern is LiveData most closely associated with to manage data updates?",
+        options: ["Singleton Pattern", "Factory Pattern", "Observer Pattern", "Strategy Pattern"],
+        answer: 2
+    },
+    {
+        text: "The ViewModel class allows you to persist UI state and provides access to business logic.",
+        answer: true
+    },
+    {
+        text: "When using View Binding in an activity, where is the static inflate() method typically called?",
+        options: ["onStart()", "onResume()", "onCreate()", "onRestart()"],
+        answer: 2
+    },
+    {
+        text: "Runnable is a functional interface in Java and is part of the standard java.lang package.",
+        answer: true
+    },
+    {
+        text: "What happens to a LiveData observer when its associated lifecycle object changes to the DESTROYED state?",
+        options: [
+            "It keeps observing until the app closes",
+            "The observer is automatically removed",
+            "The app crashes with a memory leak",
+            "The data is immediately deleted"
+        ],
+        answer: 1
+    },
+    {
+        text: "If a lifecycle becomes active again after being inactive, it receives the latest available data from LiveData automatically.",
+        answer: true
+    },
+    {
+        text: "Which architecture pattern commonly utilizes ViewModel and LiveData to manage data efficiently?",
+        options: ["MVC", "MVP", "MVVM", "MVI"],
+        answer: 2
+    },
+    {
+        text: "ViewModel exposes state to the UI and encapsulates related business logic.",
+        answer: true
+    },
+    {
+        text: "Which method allows a Handler to execute a Runnable after a specific amount of time has passed?",
+        options: ["postNow()", "postLater()", "postDelayed()", "postAfter()"],
+        answer: 2
+    },
+    {
+        text: "A plain class used to hold UI data is superior to a ViewModel because it doesn't require a saving instance state mechanism.",
+        answer: false
+    },
+    {
+        text: "How is the name of a View Binding class generated by the system?",
+        options: [
+            "Using the app package name",
+            "Randomly by Gradle",
+            "Converting XML name to Pascal case and adding 'Binding'",
+            "Using the Activity class name"
+        ],
+        answer: 2
+    },
+    {
+        text: "MutableLiveData is aware of the lifecycle of activities and fragments, preventing crashes from accessing destroyed contexts.",
+        answer: true
+    },
+    {
+        text: "In the context of ViewModel, what does the 'owner' parameter in ViewModelProvider refer to?",
+        options: ["The Android Manifest", "The Gradle build file", "The Activity or Fragment hosting the ViewModel", "The layout XML root"],
+        answer: 2
+    },
+    {
+        text: "The getRoot() method in a generated binding class returns the root view of the corresponding layout file.",
+        answer: true
+    },
+    {
+        text: "Which Logcat priority level shows the most detailed information with the least amount of filtering?",
+        options: ["DEBUG (D)", "INFO (I)", "VERBOSE (V)", "ASSERT (A)"],
+        answer: 2
+    },
+    {
+        text: "LiveData ensures that the UI always matches the data state by notifying observers whenever underlying data changes.",
+        answer: true
+    },
+    {
+        text: "Which class is described as a 'business logic or screen level state holder'?",
+        options: ["Activity", "ViewModel", "Intent", "Service"],
+        answer: 1
+    },
+    {
+        text: "A ViewModel can be used by both Activities and Fragments as a UI Controller companion.",
+        answer: true
+    },
+    {
+        text: "Which concept is described as an observable data holder that respects the lifecycle of other app components?",
+        options: ["ViewModel", "LiveData", "Bundle", "Adapter"],
+        answer: 1
+    }
+],
+
+
+fragments: [
+    {
+        text: "A Fragment represents a reusable portion of your app's UI and must be hosted by an activity or another fragment.",
+        answer: true
+    },
+    {
+        text: "Which class is responsible for performing actions on your app's fragments, such as adding, removing, or replacing them?",
+        options: ["ActivityManager", "FragmentManager", "ViewManager", "LayoutManager"],
+        answer: 1
+    },
+    {
+        text: "Fragments were added to the Android API in the Honeycomb version, which is API version 11.",
+        answer: true
+    },
+    {
+        text: "Which lifecycle method is called when it is time for the fragment to draw its user interface for the first time?",
+        options: ["onCreate", "onStart", "onCreateView", "onResume"],
+        answer: 2
+    },
+    {
+        text: "When an activity is paused, all fragments available in that activity will also be stopped.",
+        answer: true
+    },
+    {
+        text: "To draw a UI for your fragment, what must be returned from the onCreateView() method?",
+        options: ["A Boolean", "A Context object", "A View component", "A FragmentManager"],
+        answer: 2
+    },
+    {
+        text: "A fragment can implement a behaviour that has no user interface component.",
+        answer: true
+    },
+    {
+        text: "Which class provides APIs to group multiple fragment actions, such as adding or replacing siblings, into a single commit?",
+        options: ["FragmentActivity", "FragmentTransaction", "FragmentLayout", "FragmentAdapter"],
+        answer: 1
+    },
+    {
+        text: "Fragments can live independently on their own without being hosted by an activity.",
+        answer: false
+    },
+    {
+        text: "In which lifecycle method is the fragment instance first associated with a specific activity instance?",
+        options: ["onCreate", "onAttach", "onActivityCreated", "onStart"],
+        answer: 1
+    },
+    {
+        text: "Prior to fragments, developers could only show a single activity on the screen at one given point in time.",
+        answer: true
+    },
+    {
+        text: "What method is used to get an instance of FragmentTransaction from the FragmentManager?",
+        options: ["startTransaction()", "commit()", "beginTransaction()", "getTransaction()"],
+        answer: 2
+    },
+    {
+        text: "ViewPager2 is a layout manager that allows users to flip left and right through pages of data using fragments.",
+        answer: true
+    },
+    {
+        text: "Which lifecycle callback is the first indication that the user is leaving the fragment?",
+        options: ["onStop", "onDestroy", "onPause", "onDetach"],
+        answer: 2
+    },
+    {
+        text: "A FragmentManager can keep a record of fragment changes in a back stack so that the changes can be reversed.",
+        answer: true
+    },
+    {
+        text: "Which method is called once the fragment gets visible on the device screen?",
+        options: ["onCreate", "onResume", "onStart", "onAttach"],
+        answer: 2
+    },
+    {
+        text: "You create fragments by extending the standard View class.",
+        answer: false
+    },
+    {
+        text: "What method allows you to access the view hierarchy of the host activity after the activity and fragment instances have been created?",
+        options: ["onActivityCreated()", "onAttach()", "onCreate()", "onDetach()"],
+        answer: 0
+    },
+    {
+        text: "Dividing your UI into fragments makes it easier to modify your activity's appearance at runtime while the activity is in the STARTED state or higher.",
+        answer: true
+    },
+    {
+        text: "Which specific class is used in conjunction with ViewPager2 to manage and display fragments efficiently?",
+        options: ["FragmentStateAdapter", "FragmentPagerAdapter", "FragmentListAdapter", "FragmentViewAdapter"],
+        answer: 0
+    },
+    {
+        text: "The onDetach() method is called when the fragment is no longer associated with its activity.",
+        answer: true
+    },
+    {
+        text: "Where can you declare a fragment to insert it into your activity layout statically?",
+        options: ["AndroidManifest.xml", "The activity's layout XML file", "build.gradle", "strings.xml"],
+        answer: 1
+    },
+    {
+        text: "Fragments can handle their own input events and manage their own layouts.",
+        answer: true
+    },
+    {
+        text: "Which method should be called on a FragmentTransaction object to ensure the changes are executed?",
+        options: ["run()", "start()", "execute()", "commit()"],
+        answer: 3
+    },
+    {
+        text: "Activities are considered an ideal place to put global elements like a navigation drawer, while fragments are better for managing a single screen or portion of a screen.",
+        answer: true
+    },
+    {
+        text: "In the FragmentStateAdapter, which method returns the total number of fragments that will be displayed?",
+        options: ["createFragment()", "getItemCount()", "getFragmentSize()", "getPageCount()"],
+        answer: 1
+    },
+    {
+        text: "The onCreateView() method can return null if the fragment does not provide a user interface component.",
+        answer: true
+    },
+    {
+        text: "To access the FragmentManager from an AppCompatActivity, which method is typically called?",
+        options: ["getFragmentManager()", "getSupportFragmentManager()", "getChildFragmentManager()", "getParentFragmentManager()"],
+        answer: 1
+    },
+    {
+        text: "The fragment lifecycle is completely independent of the lifecycle of its host activity.",
+        answer: false
+    },
+    {
+        text: "In the course examples, what object is used to inflate an XML layout into a view object inside FirstFrag?",
+        options: ["LayoutInflater", "ViewBinding", "FragmentManager", "Intent"],
+        answer: 0
+    },
+    {
+        text: "You can use multiple instances of the same fragment class within the same activity or in multiple activities.",
+        answer: true
+    },
+    {
+        text: "Which lifecycle method is called to do final clean up of the fragment's state but is NOT guaranteed to be called by the platform?",
+        options: ["onDetach", "onDestroyView", "onDestroy", "onStop"],
+        answer: 2
+    },
+    {
+        text: "Fragments introduce modularity and reusability into your activity's UI by letting you divide it into discrete chunks.",
+        answer: true
+    },
+    {
+        text: "When inflating a fragment layout, what should the 'attachToRoot' parameter be set to if you intend to return the view manually?",
+        options: ["true", "false", "null", "zero"],
+        answer: 1
+    },
+    {
+        text: "You can add or remove fragments in an activity while the activity is running.",
+        answer: true
+    },
+    {
+        text: "If you need to access a host FragmentManager from within a child fragment, which method should you use?",
+        options: ["getChildFragmentManager()", "getParentFragmentManager()", "getSupportFragmentManager()", "getActivityManager()"],
+        answer: 1
+    },
+    {
+        text: "A single FragmentTransaction can only perform one action, such as adding one fragment.",
+        answer: false
+    },
+    {
+        text: "Which layout manager is commonly used to guide the user through the app when it is launched for the first time?",
+        options: ["LinearLayout", "ViewPager", "ConstraintLayout", "RelativeLayout"],
+        answer: 1
+    },
+    {
+        text: "A fragment defines its own layout and has its own lifecycle.",
+        answer: true
+    },
+    {
+        text: "In a typical multi-pane design for tablets, how can two UI modules be combined?",
+        options: ["By using multiple Activities", "By using multiple Fragments in one Activity", "By using multiple Manifests", "By using multiple Intents"],
+        answer: 1
+    }
+]
+
+};
+
+
+let currentSection;
+const grid = document.getElementById("homeGrid");
+sections.forEach((s,i)=>{
+    const d = document.createElement("div");
+    d.className="app-icon";
+    d.dataset.sectionId = s.id;
+    d.style.animationDelay = (i*0.07)+"s";
+    d.innerHTML = `<div class="icon-inner"><div class="emoji">${s.icon}</div><div class="label">${s.name}</div></div>`;
+    d.onclick = ()=>{ d.classList.add("clicked"); setTimeout(()=>openSection(s.id,s.name),300); };
+    grid.appendChild(d);
+});
+
+function popIcons(){
+    document.querySelectorAll(".app-icon").forEach(icon=>icon.classList.add("show"));
+}
+
+/* NAV */
+function openSection(id,name){
+    currentIndex = 0;
+    score = 0;
+    currentSection=id;
+    document.getElementById("quizTitle").textContent=name;
+    document.getElementById("home").classList.remove("active");
+    document.getElementById("quiz").classList.add("active");
+    loadQuestion();
+}
+
+function goHome(){
+    document.getElementById("quiz").classList.remove("active");
+    document.getElementById("results").classList.remove("active"); // ← ADD THIS
+    document.getElementById("home").classList.add("active");
+
+    document.querySelectorAll(".app-icon.clicked")
+        .forEach(icon=>icon.classList.remove("clicked"));
+}
+
+/* QUIZ */
+function loadQuestion(){
+    const pack = questionsBySection[currentSection] || [];
+
+    if(currentIndex >= Math.min(questionLimit, pack.length)){
+        showResults();
+        return;
+    }
+
+    const q = pack[currentIndex];
+    document.getElementById("question").textContent = q.text;
+
+    const container = document.getElementById("answerButtons");
+    container.innerHTML = "";
+
+    // TRUE / FALSE
+    if(q.options === undefined){
+        const trueBtn = document.createElement("button");
+        trueBtn.className = "true";
+        trueBtn.textContent = "True";
+        trueBtn.onclick = () => answer(true);
+
+        const falseBtn = document.createElement("button");
+        falseBtn.className = "false";
+        falseBtn.textContent = "False";
+        falseBtn.onclick = () => answer(false);
+
+        container.appendChild(trueBtn);
+        container.appendChild(falseBtn);
+    }
+    // MULTIPLE CHOICE
+    else {
+        q.options.forEach((option, index)=>{
+            const btn = document.createElement("button");
+            btn.textContent = option;
+            btn.style.background = "#4285F4";
+            btn.onclick = () => answer(index);
+            container.appendChild(btn);
+        });
+    }
+}
+
+
+function answer(value){
+    const pack = questionsBySection[currentSection];
+    if(!pack) return;
+
+    const q = pack[currentIndex];
+
+    // Determine correct answer text
+    let correctText;
+
+    if(q.options === undefined){
+        // True/False
+        correctText = q.answer ? "True" : "False";
+    } else {
+        // Multiple choice
+        correctText = q.options[q.answer];
+    }
+
+    if(value === q.answer){
+        score++;
+        showNotification("✔ Correct!", true);
+    } else {
+        showNotification(`✖ Incorrect — Correct answer: ${correctText}`, false);
+    }
+
+    currentIndex++;
+    setTimeout(loadQuestion, 900);
+}
+
+
+
+/* NOTIFICATIONS */
+function showNotification(message,isCorrect){
+    const notif=document.createElement("div");
+    notif.className=`notification ${isCorrect?'correct':'incorrect'}`;
+    notif.textContent=message;
+    document.querySelector(".phone").appendChild(notif);
+    setTimeout(()=>{ notif.classList.add("hide"); setTimeout(()=>notif.remove(),400); },500);
+}
+
+/* TUTORIAL */
+function closeTutorial(){ document.getElementById("tutorial").classList.remove("show"); }
+</script>
+</body>
+</html>
