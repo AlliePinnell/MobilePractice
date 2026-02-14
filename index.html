@@ -638,7 +638,7 @@ function updateLiveScore(){
 }
 
 function updateLiveNum(){
-    const scoreNum = currentIndex;
+    const scoreNum = currentIndex + 1;
     document.getElementById("liveNum").textContent =
         `Question: ${scoreNum}`;
 }
@@ -2304,3 +2304,4 @@ function closeTutorial(){ document.getElementById("tutorial").classList.remove("
 </script>
 </body>
 </html>
+
