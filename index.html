@@ -522,6 +522,23 @@ button:hover {
     font-size: 15px;
     cursor: pointer;
 }
+
+.score-bar {
+    position: absolute;
+    bottom: 60px;
+    left: 16px;
+    right: 16px;
+    padding: 10px 14px;
+    border-radius: 16px;
+    backdrop-filter: blur(8px);
+    background: rgba(0,0,0,0.6);
+    color: white;
+    font-size: 14px;
+    text-align: center;
+    font-weight: 500;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+}
+
 </style>
 </head>
 
@@ -571,6 +588,9 @@ button:hover {
             <div class="buttons" id="answerButtons"></div>
 
         </div>
+        <div class="score-bar" id="liveScore">
+            Score: 0 / 0
+        </div>
     </div>
 
 <div class="screen" id="answerList">
@@ -590,12 +610,7 @@ button:hover {
         </div>
     </div>
 
-    <div class="nav-bar">
-        <div class="nav-pill" onclick="goHome()"></div>
-    </div>
-</div>
-
-<div class="screen" style="margin-top: 100px;" id="results">
+    <div class="screen" id="results">
   <div class="card">
     <h2 style="color:#4CAF50">🎉 Results</h2>
     <div id="scoreText" class="question"></div>
@@ -605,7 +620,19 @@ button:hover {
   </div>
 </div>
 
+    <div class="nav-bar">
+        <div class="nav-pill" onclick="goHome()"></div>
+    </div>
+</div>
+
+
+
 <script>
+function updateLiveScore(){
+    const total = activePack.length;
+    document.getElementById("liveScore").textContent =
+        `Score: ${score} / ${total}`;
+}
 
 function launchConfetti(){
     for(let i=0;i<80;i++){
@@ -622,14 +649,18 @@ function launchConfetti(){
 }
 
 function showResults(){
+
     document.getElementById("quiz").classList.remove("active");
     document.getElementById("results").classList.add("active");
 
+    const total = activePack.length;
+
     document.getElementById("scoreText").textContent =
-        `You scored ${score} / ${Math.min(questionLimit, questionsBySection[currentSection].length)}`;
+        `You scored ${score} / ${total}`;
 
     launchConfetti();
 }
+
 
 /* BOOT SEQUENCE */
 setTimeout(() => {
@@ -694,6 +725,7 @@ const sections = [
     { id: "intents", name: "Intents", icon: "🔀" },
     { id: "viewmodel", name: "ViewModel/LiveData", icon: "📦" },
     { id: "fragments", name: "Fragments", icon: "🧱" },
+    { id: "mixed", name: "Mixed Good Bag", icon: "🎲" },
     { id: "answers", name: "Answer List", icon: "📋" }
 ];
 
@@ -737,7 +769,7 @@ lifecycle: [
         answer: 2
     },
     {
-        text: "The res/drawable folder in an Android project is typically where the XML layout files for activities are stored.",
+        text: "The 'res/drawable' folder in an Android project is typically where the XML layout files for activities are stored.",
         answer: false
     },
     {
@@ -2034,6 +2066,8 @@ fragments: [
 
 
 let currentSection;
+let mixedPool = [];
+
 const grid = document.getElementById("homeGrid");
 sections.forEach((s,i)=>{
     const d = document.createElement("div");
@@ -2052,7 +2086,6 @@ function popIcons(){
 /* NAV */
 function openSection(id,name){
 
-    // If Answer List App
     if(id === "answers"){
         showAnswerSectionSelector();
         return;
@@ -2060,12 +2093,40 @@ function openSection(id,name){
 
     currentIndex = 0;
     score = 0;
-    currentSection=id;
-    document.getElementById("quizTitle").textContent=name;
+    currentSection = id;
+
+    if(id === "mixed"){
+
+        // Combine ALL questions
+        activePack = [];
+
+        Object.keys(questionsBySection).forEach(sectionKey => {
+            questionsBySection[sectionKey].forEach(q => {
+                activePack.push(q);
+            });
+        });
+
+        // Shuffle properly
+        for(let i = activePack.length - 1; i > 0; i--){
+            const j = Math.floor(Math.random() * (i + 1));
+            [activePack[i], activePack[j]] = [activePack[j], activePack[i]];
+        }
+
+        // Limit to 40
+        activePack = activePack.slice(0, Math.min(40, activePack.length));
+
+    } else {
+        activePack = questionsBySection[id] || [];
+    }
+
+    document.getElementById("quizTitle").textContent = name;
     document.getElementById("home").classList.remove("active");
     document.getElementById("quiz").classList.add("active");
+
+    updateLiveScore();
     loadQuestion();
 }
+
 
 function goHome(){
     document.getElementById("quiz").classList.remove("active");
@@ -2079,7 +2140,9 @@ function goHome(){
 
 /* QUIZ */
 function loadQuestion(){
-    const pack = questionsBySection[currentSection] || [];
+    const pack = activePack;
+
+
 
     if(currentIndex >= Math.min(questionLimit, pack.length)){
         showResults();
@@ -2120,7 +2183,7 @@ function loadQuestion(){
 }
 
 function answer(value){
-    const pack = questionsBySection[currentSection];
+    const pack = activePack;
     if(!pack) return;
 
     const q = pack[currentIndex];
@@ -2138,6 +2201,9 @@ function answer(value){
 
     if(value === q.answer){
         score++;
+        currentIndex++;
+        updateLiveScore();
+
         showNotification("✔ Correct!", true);
     } else {
         showNotification(`✖ Incorrect — Correct answer: ${correctText}`, false);
