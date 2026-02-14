@@ -582,6 +582,9 @@ button:hover {
     </div>
 
     <div class="screen" id="quiz">
+        <div style="top: 49px;bottom: revert;" class="score-bar" id="liveNum">
+            Question: 1
+        </div>
         <div class="card">
             <div id="quizTitle" class="quiz-title"></div>
             <div id="question" class="question"></div>
@@ -632,6 +635,12 @@ function updateLiveScore(){
     const total = activePack.length;
     document.getElementById("liveScore").textContent =
         `Score: ${score} / ${total}`;
+}
+
+function updateLiveNum(){
+    const scoreNum = currentIndex;
+    document.getElementById("liveNum").textContent =
+        `Question: ${scoreNum}`;
 }
 
 function launchConfetti(){
@@ -2140,14 +2149,18 @@ function goHome(){
 
 /* QUIZ */
 function loadQuestion(){
+    updateLiveNum();
     const pack = activePack;
 
-
-
-    if(currentIndex >= Math.min(questionLimit, pack.length)){
+    if(currentIndex >= pack.length){
         showResults();
         return;
     }
+
+    console.log("Current index:", currentIndex);
+    console.log("Pack length:", activePack.length);
+
+
 
     const q = pack[currentIndex];
     document.getElementById("question").textContent = q.text;
@@ -2201,7 +2214,6 @@ function answer(value){
 
     if(value === q.answer){
         score++;
-        currentIndex++;
         updateLiveScore();
 
         showNotification("✔ Correct!", true);
